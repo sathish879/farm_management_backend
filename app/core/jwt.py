@@ -1,18 +1,20 @@
+import os
 from datetime import datetime, timedelta, timezone
 
 from fastapi import HTTPException, status
 from jose import JWTError, jwt
 
 
-SECRET_KEY = "change-this-secret-key"
+SECRET_KEY = os.getenv("SECRET_KEY")
+
+if not SECRET_KEY:
+    raise RuntimeError("SECRET_KEY environment variable is not set")
+
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60
 
 
 def create_access_token(user_id: int) -> str:
-    """
-    Create a JWT access token containing the user ID.
-    """
     expire = datetime.now(timezone.utc) + timedelta(
         minutes=ACCESS_TOKEN_EXPIRE_MINUTES
     )
@@ -32,9 +34,6 @@ def create_access_token(user_id: int) -> str:
 
 
 def verify_access_token(token: str) -> int:
-    """
-    Verify the JWT token and return the user ID.
-    """
     try:
         payload = jwt.decode(
             token,
